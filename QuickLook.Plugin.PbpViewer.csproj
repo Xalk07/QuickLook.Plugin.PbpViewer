@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{863ECAAC-18D9-4256-A27D-0F308089FB47}</ProjectGuid>
+    <OutputType>library</OutputType>
+    <RootNamespace>QuickLook.Plugin.PbpViewer</RootNamespace>
+    <AssemblyName>QuickLook.Plugin.PbpViewer</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="QuickLook.Common, Version=4.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\QuickLook.Common.4.5.0\lib\net462\QuickLook.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- LightCodec core -->
+    <Compile Include="At3Player.cs" />
+    <Compile Include="LightCodec\CodecFactory.cs" />
+    <Compile Include="LightCodec\ILightCodec.cs" />
+    <!-- atrac3 -->
+    <Compile Include="LightCodec\atrac3\Atrac3Data.cs" />
+    <Compile Include="LightCodec\atrac3\Atrac3Decoder.cs" />
+    <Compile Include="LightCodec\atrac3\ChannelUnit.cs" />
+    <Compile Include="LightCodec\atrac3\Context.cs" />
+    <Compile Include="LightCodec\atrac3\GainBlock.cs" />
+    <Compile Include="LightCodec\atrac3\TonalComponent.cs" />
+    <!-- atrac3plus -->
+    <Compile Include="LightCodec\atrac3plus\Atrac.cs" />
+    <Compile Include="LightCodec\atrac3plus\Atrac3plusData1.cs" />
+    <Compile Include="LightCodec\atrac3plus\Atrac3plusData2.cs" />
+    <Compile Include="LightCodec\atrac3plus\Atrac3plusDecoder.cs" />
+    <Compile Include="LightCodec\atrac3plus\Atrac3plusDsp.cs" />
+    <Compile Include="LightCodec\atrac3plus\AtracGainInfo.cs" />
+    <Compile Include="LightCodec\atrac3plus\Channel.cs" />
+    <Compile Include="LightCodec\atrac3plus\ChannelUnit.cs" />
+    <Compile Include="LightCodec\atrac3plus\ChannelUnitContext.cs" />
+    <Compile Include="LightCodec\atrac3plus\Context.cs" />
+    <Compile Include="LightCodec\atrac3plus\WaveEnvelope.cs" />
+    <Compile Include="LightCodec\atrac3plus\WaveParam.cs" />
+    <Compile Include="LightCodec\atrac3plus\WaveSynthParams.cs" />
+    <Compile Include="LightCodec\atrac3plus\WavesData.cs" />
+    <!-- Utils -->
+    <Compile Include="LightCodec\Utils\Arrays.cs" />
+    <Compile Include="LightCodec\Utils\BitBuffer.cs" />
+    <Compile Include="LightCodec\Utils\BitReader.cs" />
+    <Compile Include="LightCodec\Utils\CodecUtils.cs" />
+    <Compile Include="LightCodec\Utils\Dct32.cs" />
+    <Compile Include="LightCodec\Utils\FFT.cs" />
+    <Compile Include="LightCodec\Utils\FloatDSP.cs" />
+    <Compile Include="LightCodec\Utils\IBitReader.cs" />
+    <Compile Include="LightCodec\Utils\ProxyStream.cs" />
+    <Compile Include="LightCodec\Utils\RectangularArrays.cs" />
+    <Compile Include="LightCodec\Utils\SineWin.cs" />
+    <Compile Include="LightCodec\Utils\SliceStream.cs" />
+    <Compile Include="LightCodec\Utils\StreamExt.cs" />
+    <Compile Include="LightCodec\Utils\VLC.cs" />
+    <Compile Include="PbpParser.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewerPane.xaml.cs">
+      <DependentUpon>ViewerPane.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="QuickLook.Plugin.Metadata.Base.config" />
+    <None Include="QuickLook.Plugin.Metadata.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="ViewerPane.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\black_btn.png" />
+    <Resource Include="images\default_icon.png" />
+    <Resource Include="images\white_btn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\snd_off.png" />
+    <Resource Include="images\snd_on.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>powershell -ExecutionPolicy Bypass -File "$(ProjectDir)Scripts\update-version.ps1"</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>if $(ConfigurationName) == Release (
+powershell -ExecutionPolicy Bypass -File "$(ProjectDir)Scripts\pack-zip.ps1"
+)</PostBuildEvent>
+  </PropertyGroup>
+</Project>
