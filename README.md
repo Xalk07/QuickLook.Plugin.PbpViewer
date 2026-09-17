@@ -1,4 +1,4 @@
-# QuickLook.Plugin.PbpViewer  [![GitHub all releases](https://img.shields.io/github/downloads/xalk07/QuickLook.Plugin.PbpViewer/total)](https://github.com/xalk07/QuickLook.Plugin.PbpViewer/releases)
+# QuickLook.Plugin.PbpViewer
 Plugin for [QuickLook](https://github.com/QL-Win/QuickLook), allowing to preview `.pbp` file. (`EBOOT.PBP`). Used in Sony PSP, PS3 consoles.
 
 AI-assisted using Grok and ChatGPT; human-verified.
