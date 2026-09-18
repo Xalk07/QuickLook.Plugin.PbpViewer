@@ -28,7 +28,7 @@
                 <Setter Property="IsReadOnly" Value="True"/>
                 <Setter Property="Margin" Value="0,4"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="TextWrapping" Value="NoWrap"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -36,164 +36,172 @@
     <Grid Margin="16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" MinWidth="167"/>
-            <ColumnDefinition Width="9"/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Картинки слева -->
-        <StackPanel Grid.Column="0" Orientation="Vertical">
-            <Border Width="160" Height="100"  CornerRadius="6" Margin="0,0,0,8">
-                <Image x:Name="imgIcon0" Source="{StaticResource DefaultIcon}" Stretch="Uniform" Margin="4"/>
-            </Border>
-            <TextBlock Text="ICON0" FontSize="11" Opacity="0.7" HorizontalAlignment="Center" Margin="0,0,0,10"
-                       Foreground="{DynamicResource WindowTextForeground}"/>
+        <!-- Левая колонка: Картинки (оборнуты в ScrollViewer) -->
+        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Orientation="Vertical">
+                <Border Width="144" Height="80" CornerRadius="6" Margin="0,0,0,8">
+                    <Image x:Name="imgIcon0" Source="{StaticResource DefaultIcon}" Stretch="Uniform" Margin="4"/>
+                </Border>
+                <TextBlock Text="ICON0" FontSize="11" Opacity="0.7" HorizontalAlignment="Center" Margin="0,0,0,10"
+                           Foreground="{DynamicResource WindowTextForeground}"/>
 
-            <Border x:Name="borderPic0" Width="160" Height="90" CornerRadius="6"
-                    Margin="0,0,0,8" Visibility="Collapsed">
-                <Image x:Name="imgPic0" Stretch="Uniform" Margin="4"/>
-            </Border>
-            <TextBlock x:Name="lblPic0" Text="PIC0" FontSize="11" Opacity="0.7" HorizontalAlignment="Center"
-                       Margin="0,0,0,10" Visibility="Collapsed"
-                       Foreground="{DynamicResource WindowTextForeground}"/>
+                <Border x:Name="borderPic0" Width="103" Height="60" CornerRadius="6"
+                        Margin="0,0,0,8" Visibility="Collapsed">
+                    <Image x:Name="imgPic0" Stretch="Uniform" Margin="4"/>
+                </Border>
+                <TextBlock x:Name="lblPic0" Text="PIC0" FontSize="11" Opacity="0.7" HorizontalAlignment="Center"
+                           Margin="0,0,0,10" Visibility="Collapsed"
+                           Foreground="{DynamicResource WindowTextForeground}"/>
 
-            <Border x:Name="borderPic1" Width="160" Height="90" CornerRadius="6"
-                    Margin="0,0,0,8" Visibility="Collapsed">
-                <Image x:Name="imgPic1" Stretch="Uniform" Margin="4"/>
-            </Border>
-            <TextBlock x:Name="lblPic1" Text="PIC1" FontSize="11" Opacity="0.7" HorizontalAlignment="Center"
-                       Visibility="Collapsed"
-                       Foreground="{DynamicResource WindowTextForeground}"/>
-            <Border x:Name="borderBoot"
-                    Width="160"
-                    Height="90"
-                    
-                    CornerRadius="6"
-                    Margin="0,0,0,8"
-                    Visibility="Collapsed">
-                            <Image x:Name="imgBoot"
-                       Stretch="Uniform"
-                       Margin="4"/>
-                        </Border>
+                <Border x:Name="borderPic1" Width="160" Height="90" CornerRadius="6"
+                        Margin="0,0,0,8" Visibility="Collapsed">
+                    <Image x:Name="imgPic1" Stretch="Uniform" Margin="4"/>
+                </Border>
+                <TextBlock x:Name="lblPic1" Text="PIC1" FontSize="11" Opacity="0.7" HorizontalAlignment="Center"
+                           Margin="0,0,0,10" Visibility="Collapsed"
+                           Foreground="{DynamicResource WindowTextForeground}"/>
 
-                        <TextBlock x:Name="lblBoot"
-                       Text="BOOT"
-                       FontSize="11"
-                       Opacity="0.7"
-                       HorizontalAlignment="Center"
-                       Margin="0,0,0,10"
-                       Visibility="Collapsed"
-                       Foreground="{DynamicResource WindowTextForeground}"/>
-        </StackPanel>
+                <Border x:Name="borderBoot" Width="160" Height="90" CornerRadius="6"
+                        Margin="0,0,0,8" Visibility="Collapsed">
+                    <Image x:Name="imgBoot" Stretch="Uniform" Margin="4"/>
+                </Border>
+                <TextBlock x:Name="lblBoot" Text="BOOT" FontSize="11" Opacity="0.7" HorizontalAlignment="Center"
+                           Margin="0,0,0,10" Visibility="Collapsed"
+                           Foreground="{DynamicResource WindowTextForeground}"/>
+            </StackPanel>
+        </ScrollViewer>
 
-        <!-- Текст справа -->
-        <Grid Grid.Column="2" VerticalAlignment="Top">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="130"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+        <!-- Правая центральная колонка: Информация с автоматической адаптацией (ScrollViewer) -->
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid VerticalAlignment="Top" Margin="0,0,8,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" MinWidth="110"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <TextBlock x:Name="lblTitle"    Grid.Row="0"  Grid.Column="0" Text="Title:"     Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbTitle"     Grid.Row="0"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblTitle"    Grid.Row="0"  Grid.Column="0" Text="Title:"     Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbTitle"     Grid.Row="0"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblTitleId"  Grid.Row="1"  Grid.Column="0" Text="Title ID:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbTitleId"   Grid.Row="1"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblTitleId"  Grid.Row="1"  Grid.Column="0" Text="Title ID:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbTitleId"   Grid.Row="1"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblAppVer"   Grid.Row="2"  Grid.Column="0" Text="APP_VER:"   Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbAppVer"    Grid.Row="2"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblAppVer"   Grid.Row="2"  Grid.Column="0" Text="APP_VER:"   Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbAppVer"    Grid.Row="2"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblFirmware" Grid.Row="3"  Grid.Column="0" Text="Firmware:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbFirmware"  Grid.Row="3"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblFirmware" Grid.Row="3"  Grid.Column="0" Text="Firmware:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbFirmware"  Grid.Row="3"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblCategory" Grid.Row="4"  Grid.Column="0" Text="Category:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbCategory"  Grid.Row="4"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblCategory" Grid.Row="4"  Grid.Column="0" Text="Category:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbCategory"  Grid.Row="4"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblDiscId"   Grid.Row="5"  Grid.Column="0" Text="Disc ID:"   Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbDiscId"    Grid.Row="5"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblDiscId"   Grid.Row="5"  Grid.Column="0" Text="Disc ID:"   Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbDiscId"    Grid.Row="5"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblDiscVer"  Grid.Row="6"  Grid.Column="0" Text="Disc Ver:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbDiscVer"   Grid.Row="6"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblDiscVer"  Grid.Row="6"  Grid.Column="0" Text="Disc Ver:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbDiscVer"   Grid.Row="6"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblParental" Grid.Row="7"  Grid.Column="0" Text="Parental:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbParental"  Grid.Row="7"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblParental" Grid.Row="7"  Grid.Column="0" Text="Parental:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbParental"  Grid.Row="7"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblRegion"   Grid.Row="8"  Grid.Column="0" Text="Region:"    Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbRegion"    Grid.Row="8"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblRegion"   Grid.Row="8"  Grid.Column="0" Text="Region:"    Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbRegion"    Grid.Row="8"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblBootable" Grid.Row="9"  Grid.Column="0" Text="Bootable:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbBootable"  Grid.Row="9"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblBootable" Grid.Row="9"  Grid.Column="0" Text="Bootable:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbBootable"  Grid.Row="9"  Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblSize"     Grid.Row="10" Grid.Column="0" Text="File Size:" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbSize"      Grid.Row="10" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblSize"     Grid.Row="10" Grid.Column="0" Text="File Size:" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbSize"      Grid.Row="10" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblIcon1"    Grid.Row="11" Grid.Column="0" Text="ICON1.PMF:" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbIcon1"     Grid.Row="11" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblIcon1"    Grid.Row="11" Grid.Column="0" Text="ICON1.PMF:" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbIcon1"     Grid.Row="11" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblSnd0"     Grid.Row="12" Grid.Column="0" Text="SND0.AT3:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbSnd0"      Grid.Row="12" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblSnd0"     Grid.Row="12" Grid.Column="0" Text="SND0.AT3:"  Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbSnd0"      Grid.Row="12" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblDemo"     Grid.Row="13" Grid.Column="0" Text="Demo/Homebrew:"      Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbDemo"      Grid.Row="13" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+                <TextBlock x:Name="lblDemo"     Grid.Row="13" Grid.Column="0" Text="Demo/Homebrew:" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbDemo"      Grid.Row="13" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
 
-            <TextBlock x:Name="lblFakeNp"   Grid.Row="14" Grid.Column="0" Text="FakeNP:"    Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
-            <TextBox   x:Name="tbFakeNp"    Grid.Row="14" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
-        </Grid>
+                <TextBlock x:Name="lblFakeNp"   Grid.Row="14" Grid.Column="0" Text="FakeNP:"    Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                <TextBox   x:Name="tbFakeNp"    Grid.Row="14" Grid.Column="1" Style="{StaticResource ValueStyle}"/>
+            </Grid>
+        </ScrollViewer>
 
-        <!-- Тема + музыка -->
+        <!-- Кнопки управления справа вверху -->
         <StackPanel Grid.Column="3" VerticalAlignment="Top" HorizontalAlignment="Center">
             <Image x:Name="btnSwTheme"
-           Width="22" Height="22"
-           Cursor="Hand"
-           ToolTip="Switch theme">
+                   Width="22" Height="22"
+                   Cursor="Hand"
+                   ToolTip="Switch theme">
                 <Image.Style>
                     <Style TargetType="Image">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ElementName=ViewerPanel, Path=Theme}" Value="Light">
-                                <Setter Property="Source">
-                                    <Setter.Value>
-                                        <BitmapImage UriSource="images/black_btn.png"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Setter Property="Source" Value="images/black_btn.png"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding ElementName=ViewerPanel, Path=Theme}" Value="Dark">
-                                <Setter Property="Source">
-                                    <Setter.Value>
-                                        <BitmapImage UriSource="images/white_btn.png"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Setter Property="Source" Value="images/white_btn.png"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Image.Style>
             </Image>
 
-            <!-- По умолчанию скрыта; показывается если есть SND0 -->
             <Image x:Name="btnPlaySnd0"
-               Width="22"
-               Height="22"
-               Margin="0,12,0,0"
-               Cursor="Hand"
-               ToolTip="Play SND0 (loop)"
-               HorizontalAlignment="Center"
-               Stretch="Uniform"
-               Source="images/snd_off.png"/>
+                   Width="22" Height="22"
+                   Margin="0,12,0,0"
+                   Cursor="Hand"
+                   ToolTip="Play SND0 (loop)"
+                   HorizontalAlignment="Center"
+                   Stretch="Uniform"
+                   Source="images/snd_off.png"/>
+        </StackPanel>
+
+        <!-- ICON1.PMF контейнер в правом нижнем углу с текстом Icon1 под видео -->
+        <StackPanel x:Name="panelIcon1"
+                    Grid.Column="2" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Margin="0,0,12,12"
+                    Visibility="Collapsed">
+
+            <Border x:Name="borderIcon1"
+                    Width="144" Height="80"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    ClipToBounds="True">
+                <Image x:Name="imgIcon1"
+                       Stretch="Fill"
+                       RenderOptions.BitmapScalingMode="HighQuality"/>
+            </Border>
+
+            <TextBlock x:Name="lblIcon1Text"
+                       Text="ICON1"
+                       FontSize="11"
+                       Opacity="0.7"
+                       HorizontalAlignment="Center"
+                       Margin="0,4,0,0"
+                       Foreground="{DynamicResource WindowTextForeground}"/>
         </StackPanel>
     </Grid>
 </UserControl>

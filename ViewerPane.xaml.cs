@@ -15,6 +15,7 @@ namespace QuickLook.Plugin.PbpViewer {
         private PbpInfo _info;
         private ContextObject _context;
         private At3Player _player;
+        private PmfPlayer _pmfPlayer;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -92,6 +93,9 @@ namespace QuickLook.Plugin.PbpViewer {
         private void OnUnloaded(object sender, RoutedEventArgs e) {
             _player?.Dispose();
             _player = null;
+
+            _pmfPlayer?.Dispose();
+            _pmfPlayer = null;
         }
 
         private void AfterThemeChanged(object sender, PropertyChangedEventArgs e) {
@@ -173,9 +177,29 @@ namespace QuickLook.Plugin.PbpViewer {
                 _player.SetData(_info.Snd0Data);
             }
 
+
             // Показывать иконку, если секция есть ИЛИ данные загружены
             bool show = _info.HasSnd0 || (_info.Snd0Data != null && _info.Snd0Data.Length > 0);
             btnPlaySnd0.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+
+            // ===== ICON1.PMF =====
+            _pmfPlayer?.Dispose();
+            _pmfPlayer = null;
+            panelIcon1.Visibility = Visibility.Collapsed; // Показываем/скрываем всю панель с текстом
+            imgIcon1.Source = null;
+
+            if (_info.Icon1Data != null && _info.Icon1Data.Length > 2048) {
+                _pmfPlayer = new PmfPlayer();
+                _pmfPlayer.SetData(_info.Icon1Data);
+
+                _pmfPlayer.FrameUpdated += () =>
+                {
+                    imgIcon1.Source = _pmfPlayer.CurrentFrame;
+                };
+
+                panelIcon1.Visibility = Visibility.Visible;
+                _pmfPlayer.Start(Dispatcher);
+            }
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {

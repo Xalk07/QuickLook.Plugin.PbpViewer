@@ -36,6 +36,8 @@ namespace QuickLook.Plugin.PbpViewer {
         public string IsDemo { get; set; }      // "Yes" / "No" / null
         public string IsFakeNp { get; set; }    // "Yes / Probably" / "No" / null
         public byte[] Snd0Data { get; set; }
+
+        public byte[] Icon1Data { get; set; }
     }
 
     public static class PbpParser {
@@ -104,7 +106,27 @@ namespace QuickLook.Plugin.PbpViewer {
                         info.Icon1Size = size > 0 ? FormatSize(size) : null;
                     });
 
-                
+                // ICON1.PMF — загружаем сырые данные
+                info.Icon1Data = null;
+                uint icon1Start = offsets[2];
+                uint icon1End = GetEntryEnd(offsets, 2, (uint) fs.Length);
+
+                if (icon1Start > 0 && icon1End > icon1Start && icon1End <= (uint) fs.Length) {
+                    int size = (int) (icon1End - icon1Start);
+                    if (size >= 2048 && size <= 16 * 1024 * 1024) {
+                        fs.Position = icon1Start;
+                        byte[] data = br.ReadBytes(size);
+                        if (data != null && data.Length >= 16 &&
+                            data[0] == (byte) 'P' && data[1] == (byte) 'S' &&
+                            data[2] == (byte) 'M' && data[3] == (byte) 'F') {
+                            info.Icon1Data = data;
+                            info.HasIcon1 = true;
+                            info.Icon1Size = FormatSize(size);
+                        }
+                    }
+                }
+
+
                 // SND0
                 info.HasSnd0 = false;
                 info.Snd0Size = null;

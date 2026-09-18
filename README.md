@@ -1,19 +1,18 @@
-# QuickLook.Plugin.PbpViewer
+# QuickLook.Plugin.PbpViewer  [![GitHub all releases](https://img.shields.io/github/downloads/xalk07/QuickLook.Plugin.PbpViewer/total)](https://github.com/xalk07/QuickLook.Plugin.PbpViewer/releases)
 Plugin for [QuickLook](https://github.com/QL-Win/QuickLook), allowing to preview `.pbp` file. (`EBOOT.PBP`). Used in Sony PSP, PS3 consoles.
 
-AI-assisted using Grok and ChatGPT; human-verified.
+AI-assisted using Grok, ChatGPT, Gemini; human-verified.
 
 ## Features 
 
 - Supports displaying up to 4 images from a file.
-- Correct playing `SND0.AT3` music file without converting to another file formats. Reading dircetly from `.pbp` file. 
+- Correct playing `SND0.AT3` music file and `ICON1.PMF` video clip without converting to another file formats. Reading dircetly from `.pbp` file. 
 - Audio plays only when you click the music icon.
 - Ability to detect FakeNP games.
 
 ## Limitations 
 
 - `BOOT.PNG` does not display in PSP Demos, Minis, FakeNP, official PS1 games due to encryption.
-- The ability to view the `ICON1.PMF` video clip has not been implemented.
 
 ## Screenshots 
 ![PS1-PSP game preview with all 4 images.](Preview%20images/ps1-psp.PNG)
@@ -41,7 +40,7 @@ FakeNP game preview with sound enabled.
 ## Thanks to
 
 - Author of [QuickLook.Plugin.ApkViewer](https://github.com/canheo136/QuickLook.Plugin.ApkViewer) for the inspiration and for using the code as a basis for the project.
-- Author of [LightAT3](https://github.com/unknowall/LightAT3) for its practically functional AT3 codec.
+- Author of [LightAT3](https://github.com/unknowall/LightAT3) for its practically functional AT3 codec. And for video player. 
 - Our entire friendly PSP community.
 
 ## License
