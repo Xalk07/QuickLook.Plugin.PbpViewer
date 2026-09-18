@@ -1,9 +1,5 @@
-﻿# Только номер тега: 1.0.0 (без -46-g630abfd)
-$version = "1.0.0"
-try {
-    $tag = git describe --tags --abbrev=0 2>$null
-    if ($tag) { $version = $tag.Trim() }
-} catch {}
+﻿# Версия плагина — меняй только эту строку
+$version = "1.0.1"
 
 Write-Host "Using version: $version"
 
@@ -14,6 +10,7 @@ using System.Reflection;
 [assembly: AssemblyVersion("$version.0")]
 [assembly: AssemblyInformationalVersion("$version")]
 "@
+
 $text | Out-File "$PSScriptRoot\..\GitVersion.cs" -Encoding utf8
 
 $basePath = Join-Path $PSScriptRoot "..\QuickLook.Plugin.Metadata.Base.config"
@@ -21,8 +18,12 @@ $configPath = Join-Path $PSScriptRoot "..\QuickLook.Plugin.Metadata.config"
 
 if (Test-Path $basePath) {
     $xml = [xml](Get-Content $basePath -Encoding UTF8)
+
     if ($null -ne $xml.Metadata) {
         $xml.Metadata.Version = $version
     }
+
     $xml.Save($configPath)
 }
+
+Write-Host "Version set to $version"
