@@ -10,9 +10,7 @@ AI-assisted using Grok, ChatGPT, Gemini; human-verified.
 - Audio plays only when you click the music icon.
 - Ability to detect FakeNP games.
 
-## Limitations 
-
-- `BOOT.PNG` does not display in PSP Demos, Minis, FakeNP, official PS1 games due to encryption.
+The `BOOT.PNG` file may be displayed in PSP demos, Minis, and official PS1 games, but this has not been tested.
 
 ## Screenshots 
 ![PS1-PSP game preview with all 4 images.](Preview%20images/ps1-psp.PNG)
