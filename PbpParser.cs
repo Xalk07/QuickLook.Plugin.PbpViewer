@@ -90,12 +90,24 @@ namespace QuickLook.Plugin.PbpViewer {
                     GetEntryEnd(offsets, 4, (uint) fs.Length),
                     img => info.Pic1 = img);
 
+                // BOOT/STARTDAT:
+                // 1) DATA.PSAR — PS1 Classics (PSISOIMG/PSTITLEIMG) и редкий plaintext в NP
+                // 2) DATA.PSP  — sign_np / LMAN FakeNP (png_image → STARTDAT внутри DATA.PSP)
                 TryLoadBootPng(
                     fs,
                     br,
                     offsets[7],
                     GetEntryEnd(offsets, 7, (uint) fs.Length),
                     img => info.Boot = img);
+
+                if (info.Boot == null) {
+                    TryLoadBootPng(
+                        fs,
+                        br,
+                        offsets[6],
+                        GetEntryEnd(offsets, 6, (uint) fs.Length),
+                        img => info.Boot = img);
+                }
 
                 // ICON1 — реально существующая секция
                 SetEntrySize(
@@ -236,143 +248,192 @@ namespace QuickLook.Plugin.PbpViewer {
 
             return (uint) fileLength;
         }
+        /// <summary>
+        /// Ищет plaintext STARTDAT в диапазоне [start, end).
+        /// PS1 Classics: DATA.PSAR (PSISOIMG / PSTITLEIMG).
+        /// sign_np / LMAN: DATA.PSP (STARTDAT с header_size=0x50 + PNG).
+        /// </summary>
         static void TryLoadBootPng(
-    FileStream fs,
-    BinaryReader br,
-    uint start,
-    uint end,
-    Action<BitmapImage> set) {
+            FileStream fs,
+            BinaryReader br,
+            uint start,
+            uint end,
+            Action<BitmapImage> set) {
             if (start == 0 || end <= start || end > fs.Length)
                 return;
 
             try {
-                // Читаем только маленький заголовок (достаточно 0x30 байт)
-                const int headerRead = 0x30;
-                if (end - start < headerRead)
+                long psarSize = end - start;
+                if (psarSize < 0x20)
                     return;
 
-                fs.Position = start;
-                byte[] hdr = br.ReadBytes(headerRead);
+                // --- 1. Структурный путь: PSISOIMG / PSTITLEIMG (psxtract offsets) ---
+                const int headerRead = 0x30;
+                if (psarSize >= headerRead) {
+                    fs.Position = start;
+                    byte[] hdr = br.ReadBytes(headerRead);
 
-                // Ищем PSISOIMG0000 (PS1 Classics) — самый частый случай с открытым STARTDAT
-                // Magic: "PSISOIMG0000" (12 байт) + 4 байта = размер первой части = offset до STARTDAT
-                if (hdr.Length >= 16 &&
-                    hdr[0] == (byte) 'P' && hdr[1] == (byte) 'S' && hdr[2] == (byte) 'I' &&
-                    hdr[3] == (byte) 'S' && hdr[4] == (byte) 'O' && hdr[5] == (byte) 'I' &&
-                    hdr[6] == (byte) 'M' && hdr[7] == (byte) 'G' &&
-                    hdr[8] == (byte) '0' && hdr[9] == (byte) '0' && hdr[10] == (byte) '0' && hdr[11] == (byte) '0') {
-                    // Offset до второй части (STARTDAT) — последние 4 байта 16-байтового заголовка
-                    uint secondPartOffset = BitConverter.ToUInt32(hdr, 12);
+                    bool isPsIso = MatchAscii(hdr, 0, "PSISOIMG0000");       // 12 bytes, offset @ 0x0C
+                    bool isPsTitle = MatchAscii(hdr, 0, "PSTITLEIMG000000");  // 16 bytes, offset @ 0x10
 
-                    // Альтернативное место (некоторые дампы) — offset 0x1B
-                    if (secondPartOffset == 0 || secondPartOffset >= (end - start)) {
-                        if (hdr.Length >= 0x1F)
-                            secondPartOffset = BitConverter.ToUInt32(hdr, 0x1B);
+                    if (isPsIso || isPsTitle) {
+                        int offField = isPsTitle ? 0x10 : 0x0C;
+                        if (hdr.Length >= offField + 4) {
+                            uint startdatRel = BitConverter.ToUInt32(hdr, offField);
+                            if (TryExtractStartDatAt(fs, br, start, end, start + startdatRel, set))
+                                return;
+                        }
                     }
 
-                    if (secondPartOffset > 0 && secondPartOffset < (end - start)) {
-                        long special = start + secondPartOffset;
-
-                        // Проверяем, что там действительно STARTDAT
-                        fs.Position = special;
-                        byte[] marker = br.ReadBytes(8);
-                        if (marker.Length == 8 &&
-                            marker[0] == (byte) 'S' && marker[1] == (byte) 'T' &&
-                            marker[2] == (byte) 'A' && marker[3] == (byte) 'R' &&
-                            marker[4] == (byte) 'T' && marker[5] == (byte) 'D' &&
-                            marker[6] == (byte) 'A' && marker[7] == (byte) 'T') {
-                            fs.Position = special + 0x10;
-                            uint headerSize = br.ReadUInt32();
-                            uint bootSize = br.ReadUInt32();
-
-                            // Разумные проверки
-                            if (headerSize >= 0x20 && headerSize <= 0x200 &&
-                                bootSize >= 16 && bootSize <= 4 * 1024 * 1024) {
-                                long bootStart = special + headerSize;
-                                if (bootStart >= start && bootStart + bootSize <= end) {
-                                    fs.Position = bootStart;
-                                    byte[] png = br.ReadBytes((int) bootSize);
-
-                                    if (png.Length >= 8 &&
-                                        png[0] == 0x89 && png[1] == 0x50 &&
-                                        png[2] == 0x4E && png[3] == 0x47) {
-                                        var img = new BitmapImage();
-                                        using (var ms = new MemoryStream(png)) {
-                                            img.BeginInit();
-                                            img.CacheOption = BitmapCacheOption.OnLoad;
-                                            img.StreamSource = ms;
-                                            img.EndInit();
-                                            img.Freeze();
-                                        }
-                                        set(img);
-                                        return;
-                                    }
-                                }
-                            }
-                        }
+                    // DATA.PSP (sign_np): STARTDAT часто сразу после ~0x594+0xC
+                    if (psarSize >= 0x5A0 + 0x18) {
+                        if (TryExtractStartDatAt(fs, br, start, end, start + 0x5A0, set))
+                            return;
                     }
                 }
 
-                // Fallback: очень ограниченный поиск только в первых ~2 МБ
-                // (на случай нестандартных/кастомных PBP, где STARTDAT всё-таки открыт)
-                const int maxScan = 2 * 1024 * 1024;
-                long scanEnd = Math.Min(end, start + maxScan);
-                long remaining = scanEnd - start;
-                const int chunkSize = 64 * 1024; // маленький чанк
-                byte[] buffer = new byte[chunkSize + 16];
+                // --- 2. Скан plaintext "STARTDAT" (голова + хвост больших PSAR) ---
+                const int maxScan = 8 * 1024 * 1024;
+                if (ScanRegionForStartDat(fs, br, start, end, start, Math.Min(psarSize, maxScan), set))
+                    return;
 
-                long absolute = start;
-                while (remaining > 0) {
-                    int toRead = (int) Math.Min(buffer.Length, remaining);
-                    fs.Position = absolute;
-                    int read = fs.Read(buffer, 0, toRead);
-                    if (read < 8) break;
-
-                    for (int i = 0; i <= read - 8; i++) {
-                        if (buffer[i] == (byte) 'S' && buffer[i + 1] == (byte) 'T' &&
-                            buffer[i + 2] == (byte) 'A' && buffer[i + 3] == (byte) 'R' &&
-                            buffer[i + 4] == (byte) 'T' && buffer[i + 5] == (byte) 'D' &&
-                            buffer[i + 6] == (byte) 'A' && buffer[i + 7] == (byte) 'T') {
-                            long special = absolute + i;
-                            fs.Position = special + 0x10;
-
-                            uint headerSize = br.ReadUInt32();
-                            uint bootSize = br.ReadUInt32();
-
-                            if (headerSize >= 0x20 && headerSize <= 0x200 &&
-                                bootSize >= 16 && bootSize <= 4 * 1024 * 1024) {
-                                long bootStart = special + headerSize;
-                                if (bootStart >= start && bootStart + bootSize <= end) {
-                                    fs.Position = bootStart;
-                                    byte[] png = br.ReadBytes((int) bootSize);
-
-                                    if (png.Length >= 8 &&
-                                        png[0] == 0x89 && png[1] == 0x50 &&
-                                        png[2] == 0x4E && png[3] == 0x47) {
-                                        var img = new BitmapImage();
-                                        using (var ms = new MemoryStream(png)) {
-                                            img.BeginInit();
-                                            img.CacheOption = BitmapCacheOption.OnLoad;
-                                            img.StreamSource = ms;
-                                            img.EndInit();
-                                            img.Freeze();
-                                        }
-                                        set(img);
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    long advance = Math.Max(1, read - 16);
-                    absolute += advance;
-                    remaining -= advance;
+                if (psarSize > maxScan) {
+                    long tailStart = end - maxScan;
+                    if (tailStart > start)
+                        ScanRegionForStartDat(fs, br, start, end, tailStart, maxScan, set);
                 }
             }
             catch {
-                // BOOT.PNG отсутствует или повреждён — просто выходим
+                // BOOT отсутствует / битый
             }
+        }
+
+        /// <summary>
+        /// STARTDAT: magic(8) + unk1(4) + unk2(4) + header_size(4) + data_size(4)
+        /// PNG начинается с offset + header_size (часто header_size = 0x50).
+        /// </summary>
+        static bool TryExtractStartDatAt(
+            FileStream fs,
+            BinaryReader br,
+            long regionStart,
+            long regionEnd,
+            long startdatOffset,
+            Action<BitmapImage> set) {
+            if (startdatOffset < regionStart || startdatOffset + 0x18 > regionEnd)
+                return false;
+
+            fs.Position = startdatOffset;
+            byte[] sh = br.ReadBytes(0x18);
+            if (sh.Length < 0x18)
+                return false;
+
+            if (!MatchAscii(sh, 0, "STARTDAT"))
+                return false;
+
+            uint headerSize = BitConverter.ToUInt32(sh, 0x10);
+            uint dataSize = BitConverter.ToUInt32(sh, 0x14);
+
+            if (headerSize < 0x18 || headerSize > 0x200)
+                return false;
+            if (dataSize < 16 || dataSize > 4 * 1024 * 1024)
+                return false;
+
+            long pngOff = startdatOffset + headerSize;
+            if (pngOff < regionStart || pngOff + dataSize > regionEnd)
+                return false;
+
+            fs.Position = pngOff;
+            byte[] png = br.ReadBytes((int) dataSize);
+            if (png == null || png.Length < 8)
+                return false;
+
+            if (png[0] != 0x89 || png[1] != 0x50 || png[2] != 0x4E || png[3] != 0x47)
+                return false;
+
+            int iend = FindPngIend(png);
+            if (iend > 8 && iend < png.Length)
+                Array.Resize(ref png, iend);
+
+            try {
+                var img = new BitmapImage();
+                using (var ms = new MemoryStream(png)) {
+                    img.BeginInit();
+                    img.CacheOption = BitmapCacheOption.OnLoad;
+                    img.StreamSource = ms;
+                    img.EndInit();
+                    img.Freeze();
+                }
+                set(img);
+                return true;
+            }
+            catch {
+                return false;
+            }
+        }
+
+        static bool ScanRegionForStartDat(
+            FileStream fs,
+            BinaryReader br,
+            long regionStart,
+            long regionEnd,
+            long scanStart,
+            long scanLen,
+            Action<BitmapImage> set) {
+            if (scanLen < 8)
+                return false;
+
+            const int chunkSize = 64 * 1024;
+            byte[] buffer = new byte[chunkSize + 8];
+            long absolute = scanStart;
+            long remaining = scanLen;
+
+            while (remaining >= 8) {
+                int toRead = (int) Math.Min(buffer.Length, remaining);
+                fs.Position = absolute;
+                int read = fs.Read(buffer, 0, toRead);
+                if (read < 8)
+                    break;
+
+                for (int i = 0; i <= read - 8; i++) {
+                    if (buffer[i] == (byte) 'S' && buffer[i + 1] == (byte) 'T' &&
+                        buffer[i + 2] == (byte) 'A' && buffer[i + 3] == (byte) 'R' &&
+                        buffer[i + 4] == (byte) 'T' && buffer[i + 5] == (byte) 'D' &&
+                        buffer[i + 6] == (byte) 'A' && buffer[i + 7] == (byte) 'T') {
+                        long cand = absolute + i;
+                        if (TryExtractStartDatAt(fs, br, regionStart, regionEnd, cand, set))
+                            return true;
+                    }
+                }
+
+                long advance = Math.Max(1, read - 7);
+                absolute += advance;
+                remaining -= advance;
+            }
+
+            return false;
+        }
+
+        static bool MatchAscii(byte[] data, int offset, string ascii) {
+            if (data == null || offset < 0 || offset + ascii.Length > data.Length)
+                return false;
+            for (int i = 0; i < ascii.Length; i++) {
+                if (data[offset + i] != (byte) ascii[i])
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>Конец PNG после IEND+CRC, или -1.</summary>
+        static int FindPngIend(byte[] png) {
+            for (int i = 8; i <= png.Length - 12; i++) {
+                if (png[i] == 0x49 && png[i + 1] == 0x45 &&
+                    png[i + 2] == 0x4E && png[i + 3] == 0x44) {
+                    int end = i + 8;
+                    if (end <= png.Length)
+                        return end;
+                }
+            }
+            return -1;
         }
         static void TryLoadPng(FileStream fs, BinaryReader br, uint start, uint end, Action<BitmapImage> set) {
             if (start == 0 || end <= start || end > fs.Length) return;

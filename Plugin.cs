@@ -20,7 +20,7 @@ namespace QuickLook.Plugin.PbpViewer {
         }
 
         public void Prepare(string path, ContextObject context) {
-            context.PreferredSize = new Size(700, 500);
+            context.PreferredSize = new Size(700, 485);
             context.Title = Path.GetFileName(path);
         }
 
