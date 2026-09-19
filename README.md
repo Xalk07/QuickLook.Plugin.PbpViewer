@@ -40,7 +40,7 @@ FakeNP game preview with sound enabled.
 ## Thanks to
 
 - Author of [QuickLook.Plugin.ApkViewer](https://github.com/canheo136/QuickLook.Plugin.ApkViewer) for the inspiration and for using the code as a basis for the project.
-- Author of [LightAT3](https://github.com/unknowall/LightAT3) for its practically functional AT3 codec. And for video player. 
+- Author of [LightAT3](https://github.com/unknowall/LightAT3) for its practically functional AT3 codec. And for video codec. 
 - Our entire friendly PSP community.
 
 ## License
