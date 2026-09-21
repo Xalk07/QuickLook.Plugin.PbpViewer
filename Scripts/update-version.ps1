@@ -1,5 +1,5 @@
 ﻿# Версия плагина — меняй только эту строку
-$version = "1.0.2"
+$version = "1.0.3"
 
 Write-Host "Using version: $version"
 
