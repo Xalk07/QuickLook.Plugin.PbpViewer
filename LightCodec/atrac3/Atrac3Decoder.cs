@@ -611,78 +611,70 @@ namespace LightCodec.atrac3
             return 0;
         }
 
-        private int decodeFrame()
-        {
+        private int decodeFrame() {
             int ret;
 
-            if (ctx.codingMode == JOINT_STEREO)
-            {
-                // channel coupling mode
-                // decode Sound Unit 1
+            if (ctx.codingMode == JOINT_STEREO) {
+                // -------------------------------------------------------
+                // JOINT STEREO (исправлено по образцу FFmpeg)
+                // -------------------------------------------------------
+
+                // 1. Sound Unit 1 — читаем с начала исходного кадра
                 ret = decodeChannelSoundUnit(ctx.units[0], ctx.samples[0], 0, JOINT_STEREO);
                 if (ret != 0)
-                {
                     return ret;
+
+                // 2. Переключаемся на развёрнутый кадр (подготовлен в decode)
+                if (ctx.reversedFrame == null || ctx.reversedFrame.Length < ctx.blockAlign)
+                    return AT3_ERROR;
+
+                unsafe {
+                    fixed (byte* pRev = ctx.reversedFrame) {
+                        br = new BitReader(pRev, ctx.blockAlign);
+                        ctx.br = br;
+                    }
                 }
 
-                // Framedata of the su2 in the joint-stereo mode is encoded in
-                // reverse byte order so we need read in reverse direction
-                br.seek(ctx.blockAlign - 1);
-                br.Direction = -1;
-
-                // Skip the sync codes (0xF8).
-                while (br.peek(8) == 0xF8)
-                {
+                // Пропускаем ведущие 0xF8 (они появляются после reverse)
+                int maxSkip = ctx.blockAlign;
+                while (maxSkip-- > 0 && br.peek(8) == 0xF8)
                     br.read(8);
-                }
 
-                // Fill the Weighting coeffs delay buffer
+                // Weighting delay buffer
                 Array.Copy(ctx.weightingDelay, 2, ctx.weightingDelay, 0, 4);
                 ctx.weightingDelay[4] = br.read1();
                 ctx.weightingDelay[5] = br.read(3);
 
-                for (int i = 0; i < 4; i++)
-                {
+                // Matrix coefficients
+                for (int i = 0; i < 4; i++) {
                     ctx.matrixCoeffIndexPrev[i] = ctx.matrixCoeffIndexNow[i];
                     ctx.matrixCoeffIndexNow[i] = ctx.matrixCoeffIndexNext[i];
                     ctx.matrixCoeffIndexNext[i] = br.read(2);
                 }
 
-                // Decode sound Unit 2.
+                // 3. Sound Unit 2
                 ret = decodeChannelSoundUnit(ctx.units[1], ctx.samples[1], 1, JOINT_STEREO);
-                br.Direction = 1;
-                br.seek(ctx.blockAlign);
-
                 if (ret != 0)
-                {
                     return ret;
-                }
 
-                // Reconstruct the channel coefficients
-                reverseMatrixing(ctx.samples[0], ctx.samples[1], ctx.matrixCoeffIndexPrev, ctx.matrixCoeffIndexNow);
-
+                // 4. Восстановление стерео
+                reverseMatrixing(ctx.samples[0], ctx.samples[1],
+                                 ctx.matrixCoeffIndexPrev, ctx.matrixCoeffIndexNow);
                 channelWeighting(ctx.samples[0], ctx.samples[1], ctx.weightingDelay);
             }
-            else
-            {
-                // normal stereo mode or mono
-                // Decode the channel sound units
-                for (int i = 0; i < ctx.channels; i++)
-                {
-                    // Set the bitstream reader at the start of a channel sound unit
-                    br.seek(i * ctx.blockAlign / ctx.channels);
+            else {
+                // Обычный stereo / mono
+                for (int i = 0; i < ctx.channels; i++) {
+                    br.seek(i * ctx.blockAlign / Math.Max(1, ctx.channels));
 
                     ret = decodeChannelSoundUnit(ctx.units[i], ctx.samples[i], i, ctx.codingMode);
                     if (ret != 0)
-                    {
                         return ret;
-                    }
                 }
             }
 
-            // Apply the iQMF synthesis filter
-            for (int i = 0; i < ctx.channels; i++)
-            {
+            // iQMF synthesis
+            for (int i = 0; i < ctx.channels; i++) {
                 Atrac.iqmf(ctx.samples[i], 0, ctx.samples[i], 256, 256, ctx.samples[i], 0, ctx.units[i].delayBuf1, ctx.tempBuf);
                 Atrac.iqmf(ctx.samples[i], 768, ctx.samples[i], 512, 256, ctx.samples[i], 512, ctx.units[i].delayBuf2, ctx.tempBuf);
                 Atrac.iqmf(ctx.samples[i], 0, ctx.samples[i], 512, 512, ctx.samples[i], 0, ctx.units[i].delayBuf3, ctx.tempBuf);
@@ -691,28 +683,42 @@ namespace LightCodec.atrac3
             return 0;
         }
 
-        public virtual unsafe int decode(void* inputAddr, int inputLength, void* output, out int outputLength)
-        {
+        public virtual unsafe int decode(void* inputAddr, int inputLength, void* output, out int outputLength) {
             outputLength = 0;
 
+            if (ctx == null)
+                return AT3_ERROR;
+
+            // Для joint-stereo заранее разворачиваем кадр (как делает FFmpeg)
+            if (ctx.codingMode == JOINT_STEREO) {
+                if (ctx.reversedFrame == null || ctx.reversedFrame.Length != inputLength)
+                    ctx.reversedFrame = new byte[inputLength];
+
+                // Разворот всего кадра
+                byte* src = (byte*) inputAddr;
+                for (int i = 0; i < inputLength; i++)
+                    ctx.reversedFrame[i] = src[inputLength - 1 - i];
+            }
+
+            // Создаём BitReader на исходном кадре (для SU1)
             br = new BitReader(inputAddr, inputLength);
             ctx.br = br;
 
             int ret = decodeFrame();
             if (ret < 0)
-            {
                 return ret;
-            }
 
             int sampleBytes = SAMPLES_PER_FRAME * ctx.outputChannels * sizeof(short);
 
-            writeOutput(ctx.samples, (short*)output + outputLength / sizeof(short), SAMPLES_PER_FRAME, ctx.channels, ctx.outputChannels);
+            writeOutput(ctx.samples,
+                        (short*) output + outputLength / sizeof(short),
+                        SAMPLES_PER_FRAME,
+                        ctx.channels,
+                        ctx.outputChannels);
 
             outputLength += sampleBytes;
 
-            //System.Console.WriteLine(string.Format("Bytes read 0x{0:X}", ctx.br.BytesRead));
-
-            return ctx.br.BytesRead;
+            return inputLength; // возвращаем сколько байт обработали
         }
 
         public virtual int NumberOfSamples

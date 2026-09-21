@@ -27,6 +27,9 @@ namespace LightCodec.atrac3
         public FFT mdctCtx;
 
         public float[][] samples = RectangularArrays.ReturnRectangularFloatArray(2, SAMPLES_PER_FRAME);
+
+        // Добавь это поле
+        public byte[] reversedFrame;
     }
 
 }
