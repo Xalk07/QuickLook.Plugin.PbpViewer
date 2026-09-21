@@ -283,10 +283,10 @@ namespace QuickLook.Plugin.PbpViewer {
                         return;
 
                     // Настройка индивидуальных отступов для каждой из сторон (в пикселях):
-                    int marginLeft = 2;   // Слева
-                    int marginTop = 2;    // Сверху
-                    int marginRight = 3;  // Справа (на 1px больше)
-                    int marginBottom = 3; // Снизу (на 1px больше)
+                    int marginLeft = 0;   // Слева
+                    int marginTop = 0;    // Сверху
+                    int marginRight = 0;  // Справа (на 1px больше)
+                    int marginBottom = 0; // Снизу (на 1px больше)
 
                     using (Bitmap croppedBitmap = CropMargins(rawBitmap, marginLeft, marginTop, marginRight, marginBottom)) {
                         IntPtr hBitmap = croppedBitmap.GetHbitmap();

@@ -201,9 +201,23 @@ namespace QuickLook.Plugin.PbpViewer {
             sampleRate = fmt.SampleRate > 0 ? (int) fmt.SampleRate : 44100;
             channels = fmt.Channels > 0 ? fmt.Channels : 2;
 
-            byte[] result = TryDecode(at3, fmt, dataOffset, dataLength, channels, 0);
-            if (result == null || result.Length < 4)
+            // Определяем coding mode из extradata (для ATRAC3)
+            int codingMode = 0; // 0 = STEREO, 1 = JOINT_STEREO
+            if (fmt.FormatTag == 0x0270 && fmt.Extra != null && fmt.Extra.Length >= 10) {
+                // WAV ATRAC3 extradata (14 байт):
+                // [0-1] unknown (обычно 1)
+                // [2-5] samples per channel
+                // [6-7] coding_mode (0 или 1)
+                codingMode = BitConverter.ToUInt16(fmt.Extra, 6) != 0 ? 1 : 0;
+            }
+
+            byte[] result = TryDecode(at3, fmt, dataOffset, dataLength, channels, codingMode);
+
+            // Fallback на всякий случай (если вдруг extradata битый)
+            if ((result == null || result.Length < 4) && codingMode == 0)
                 result = TryDecode(at3, fmt, dataOffset, dataLength, channels, 1);
+            else if ((result == null || result.Length < 4) && codingMode == 1)
+                result = TryDecode(at3, fmt, dataOffset, dataLength, channels, 0);
 
             return result;
         }
