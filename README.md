@@ -3,6 +3,8 @@ Plugin for [QuickLook](https://github.com/QL-Win/QuickLook), allowing to preview
 
 AI-assisted using Grok, ChatGPT, Gemini; human-verified.
 
+If you need a similar plugin but for `.iso`, take a look at this one: [QuickLook.Plugin.IsoViewer](https://github.com/Xalk07/QuickLook.Plugin.IsoViewer)
+
 ## Features 
 
 - Supports displaying up to 4 images from a file.
@@ -33,7 +35,7 @@ FakeNP game preview with sound enabled.
 1. Clone repo and sub-modules
 2. Build project with Release profile.
 3. Run `Scripts\pack-zip.ps1`
-4. Find plugin `QuickLook.Plugin.ApkViewer.qlplugin` in the project directory.
+4. Find plugin `QuickLook.Plugin.PbpViewer.qlplugin` in the project directory.
 
 ## Thanks to
 
