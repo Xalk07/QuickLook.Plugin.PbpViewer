@@ -195,6 +195,18 @@
     <Resource Include="images\snd_off.png" />
     <Resource Include="images\snd_on.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\bg_pic_off.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\bg_pmf_off.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\bg_pic_on.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\bg_pmf_on.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>powershell -ExecutionPolicy Bypass -File "$(ProjectDir)Scripts\update-version.ps1"</PreBuildEvent>

@@ -33,15 +33,41 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Margin="16">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" MinWidth="167"/>
-            <ColumnDefinition Width="12"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
+    <Grid>
+        <!-- ===== ФОН (самый нижний слой) ===== -->
+        <Image x:Name="bgImage"
+           Stretch="UniformToFill"
+           Opacity="0.45"
+           Visibility="Collapsed"
+           IsHitTestVisible="False"
+           HorizontalAlignment="Stretch"
+           VerticalAlignment="Stretch">
+            <Image.Effect>
+                <BlurEffect Radius="25" KernelType="Gaussian"/>
+            </Image.Effect>
+        </Image>
 
-        <!-- Левая колонка: Картинки (оборнуты в ScrollViewer) -->
+        <Image x:Name="bgVideo"
+           Stretch="UniformToFill"
+           Opacity="0.55"
+           Visibility="Collapsed"
+           IsHitTestVisible="False"
+           HorizontalAlignment="Stretch"
+           VerticalAlignment="Stretch">
+            <Image.Effect>
+                <BlurEffect Radius="25" KernelType="Gaussian"/>
+            </Image.Effect>
+        </Image>
+        <!-- ===== ОСНОВНОЙ КОНТЕНТ (поверх фона) ===== -->
+        <Grid Margin="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="167"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Левая колонка: Картинки (оборнуты в ScrollViewer) -->
         <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Orientation="Vertical">
                 <Border Width="144" Height="80" CornerRadius="6" Margin="0,0,0,8">
@@ -167,6 +193,23 @@
                     </Style>
                 </Image.Style>
             </Image>
+            <!-- После btnSwTheme, перед или после btnPlaySnd0 -->
+            <Image x:Name="btnBgPic1"
+       Width="22" Height="22"
+       Margin="0,12,0,0"
+       Cursor="Hand"
+       ToolTip="Background: PIC1 (blurred)"
+       Visibility="Collapsed"
+       Source="images/bg_pic_off.png"/>
+            <!-- свои иконки on/off -->
+
+            <Image x:Name="btnBgPmf"
+       Width="22" Height="22"
+       Margin="0,12,0,0"
+       Cursor="Hand"
+       ToolTip="Background: ICON1.PMF (blurred)"
+       Visibility="Collapsed"
+       Source="images/bg_pmf_off.png"/>
 
             <Image x:Name="btnPlaySnd0"
                    Width="22" Height="22"
@@ -203,5 +246,7 @@
                        Margin="0,4,0,0"
                        Foreground="{DynamicResource WindowTextForeground}"/>
         </StackPanel>
+
     </Grid>
+</Grid>
 </UserControl>
